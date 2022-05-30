@@ -1,0 +1,79 @@
+-- View/Query 1
+DROP VIEW IF EXISTS count_game_sales;
+CREATE VIEW count_game_sales AS
+    
+SELECT game_id, Count(game_id) as count
+FROM customer_order
+GROUP BY game_id 
+ORDER BY count DESC ;
+    
+SELECT * 
+FROM count_game_sales ;
+
+-- View/Query 2
+DROP VIEW IF EXISTS publisher_and_retailer_info;
+CREATE VIEW publisher_and_retailer_info AS    
+	
+SELECT DISTINCT game_title, game_platforms, publisher_name, retailer_name, CONCAT(retailer_city, ', ', retailer_state) AS 'retailer city/state', 
+CONCAT(first_name, ' ', last_name) AS employee,
+REPLACE(REPLACE(REPLACE(retailer_phone_number, ') ', '-'), '(', ''), '-','-') AS 'retailer_phone_number'
+    FROM game_retailers gt
+    INNER JOIN game g
+    ON gt.retailer_id = g.retailer_id
+    INNER JOIN publisher p
+    ON g.publisher_id = p.publisher_id
+    INNER JOIN console_platform c
+    ON c.console_platform_id = g.console_id
+    INNER JOIN shipping s -- 
+    ON gt.retailer_id = s.emp_id_ship
+    INNER JOIN employee e
+    ON e.retailer_id_1 = gt.retailer_id;
+    
+    SELECT *
+    FROM publisher_and_retailer_info
+    WHERE game_platforms = 'PC' OR game_platforms = 'SWITCH';
+
+-- View/Query 3
+DROP VIEW IF EXISTS customer_more_than_one;
+CREATE VIEW customer_more_than_one AS
+    
+SELECT CONCAT(c_first_name, ' ', c_last_name) AS customer, COUNT(*) AS quantity,
+CONCAT('$ ', FORMAT(SUM(price), 2)) AS item_total
+FROM
+	game g 
+	INNER JOIN customer_order co
+	ON g.game_id = co.game_id
+    INNER JOIN customer c
+    ON 	c.customer_id = co.customer_id
+    INNER JOIN publisher p
+    ON g.publisher_id = p.publisher_id
+	GROUP BY customer
+	HAVING COUNT(*) > 1
+    ORDER BY customer DESC;
+    
+    SELECT * 
+    FROM customer_more_than_one;
+
+-- View/Query 4
+DROP VIEW IF EXISTS games_below_40;
+CREATE VIEW games_below_40 AS
+    
+SELECT game_title, price
+FROM game g 
+where price <40;
+    
+SELECT * 
+FROM games_below_40;
+
+-- View/Query 5
+DROP VIEW IF EXISTS count_game_sales;
+CREATE VIEW count_game_sales AS
+    
+SELECT game_id, Count(game_id) as count
+FROM customer_order
+GROUP BY game_id 
+ORDER BY count DESC ;
+    
+SELECT * 
+FROM count_game_sales ;
+
